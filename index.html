@@ -64,7 +64,8 @@
             .custom-cursor::after {
                 content: '';
                 width: 100%; height: 100%;
-                background: url('https://i.imgur.com/akb3zac.png') no-repeat center;
+                /* EDITADO: Imagen local para el cursor */
+                background: url('cursor.png') no-repeat center;
                 background-size: contain;
                 filter: drop-shadow(0 0 5px rgba(255, 105, 180, 0.5));
             }
@@ -535,7 +536,7 @@
                     <div class="status-container">
                         <div class="avatar-mini">
                             <!-- EDITAR TEXTO AQUI: Avatar del status container -->
-                            <img src="https://img.com/image/GGZ1dnVv6OWh.jpg" alt="Avatar" onerror="this.src='https://via.placeholder.com/100/FFEAEE/C44577?text=G'">
+                            <img src="avatar-estado.jpg" alt="Avatar" onerror="this.src='default-avatar.jpg'">
                         </div>
                         <div class="status-info">
                             <span class="status-dot"></span>
@@ -548,11 +549,11 @@
                     <div class="hero-title-wrapper">
                         <h1 class="hero-title">
                             <!-- EDITAR TEXTO AQUI: Título imagen GOMI -->
-                            <img src="https://i.ibb.co/bjLNjfQb/texto-gomi.png" alt="Gomi" class="hero-text-img-gomi">
+                            <img src="texto-gomi.png" alt="Gomi" class="hero-text-img-gomi">
                         </h1>
                         <!-- EDITAR TEXTO AQUI: Imágenes de estrellas animadas -->
-                        <img src="https://i.ibb.co/zWRDKZ8T/estrella2.png" alt="Estrella" class="hero-star star-top">
-                        <img src="https://i.ibb.co/jZwqLR1d/estrella1.png" alt="Estrella" class="hero-star star-bottom">
+                        <img src="estrella2.png" alt="Estrella" class="hero-star star-top">
+                        <img src="estrella1.png" alt="Estrella" class="hero-star star-bottom">
                     </div>
                     <div class="hero-text-block">
                         <div id="quote-content" class="fade-text">
@@ -568,7 +569,7 @@
                             <!-- EDITAR TEXTO AQUI: Texto de Gemini -->
                             <span>GEMINI</span>
                             <!-- EDITAR TEXTO AQUI: Ícono Gemini -->
-                            <img src="https://img.icons8.com/?size=96&id=vCMmqpZyjJv4&format=png" alt="Gemini Icon">
+                            <img src="gemini-icon.png" alt="Gemini Icon">
                         </div>
                         <!-- EDITAR TEXTO AQUI: Botón Click Me -->
                         <button class="btn-click-me" id="btn-click-me">click me</button>
@@ -629,36 +630,37 @@
                 <div class="section-header">
                     <!-- EDITAR TEXTO AQUI: Título y descripción de la sección Friends -->
                      
-<img src="https://xatimg.com/image/6LS1TGiqnuTA.gif" 
+<img src="amigos-avatar-principal.gif" 
      alt="Avatar" 
      class="friend-avatar"
      style="width:50px; height:auto;">
                     
                     <div style="text-align: center;">
-                    <h2 class="section-title">Friends</h2>
-                    <p class="hero-description" style="margin: 0 auto;">♥.</p>
+                        <h2 class="section-title">Friends</h2>
+                        <p class="hero-description" style="margin: 0 auto;">♥.</p>
+                    </div>
                 </div>
 
                 <div class="friends-list">
                     <!-- EDITAR TEXTO AQUI: Botones de amigos (Puedes cambiar el src de img por sus avatares reales) -->
                     <a href="https://xat.me/kiti" target="_blank" class="btn-secondary friend-btn">
-                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=T" alt="Avatar" class="friend-avatar">
+                        <img src="avatar-teki.jpg" alt="Avatar" class="friend-avatar">
                         Teki
                     </a>
                     <a href="https://xat.me/fran" target="_blank" class="btn-secondary friend-btn">
-                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=F" alt="Avatar" class="friend-avatar">
+                        <img src="avatar-franco.jpg" alt="Avatar" class="friend-avatar">
                         Franco
                     </a>
                     <a href="https://xat.me/Xpiitu" target="_blank" class="btn-secondary friend-btn">
-                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=P" alt="Avatar" class="friend-avatar">
+                        <img src="avatar-pitu.jpg" alt="Avatar" class="friend-avatar">
                         Pitu
                     </a>
                     <a href="https://xat.me/ELV1S" target="_blank" class="btn-secondary friend-btn">
-                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=E" alt="Avatar" class="friend-avatar">
+                        <img src="avatar-elvis.jpg" alt="Avatar" class="friend-avatar">
                         Elvis
                     </a>
                     <a href="https://xat.me/Epika" target="_blank" class="btn-secondary friend-btn">
-                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=E" alt="Avatar" class="friend-avatar">
+                        <img src="avatar-epika.jpg" alt="Avatar" class="friend-avatar">
                         Epika
                     </a>
                 </div>
@@ -673,7 +675,7 @@
                     <h2 class="section-title" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                         Photos
                         <!-- EDITAR IMAGEN AQUI: Reemplaza el src con la URL de tu imagen decorativa -->
-                        <img src="https://img.icons8.com/?size=48&id=N8DoP13woRV9&format=png" alt="Decor" style="height: 0.9em; width: auto; object-fit: contain; flex-shrink: 0;">
+                        <img src="decoracion-photos.png" alt="Decor" style="height: 0.9em; width: auto; object-fit: contain; flex-shrink: 0;">
                     </h2>
                     <p class="hero-description" style="margin: 0 auto; margin-bottom: 1rem;">Aesthetic visual gallery.</p>
                 </div>
@@ -681,16 +683,16 @@
                 <div class="photo-gallery">
                     <div class="photo-card">
                         <!-- EDITAR TEXTO AQUI: Fotos de galería -->
-                        <img src="https://xatimg.com/image/mDAMWWOZSD76.jpg" alt="Gallery Photo 1">
+                        <img src="galeria-foto-1.jpg" alt="Gallery Photo 1">
                     </div>
                     <div class="photo-card">
-                        <img src="https://xatimg.com/image/uKQV0yEqGtvr.jpg" alt="Gallery Photo 2">
+                        <img src="galeria-foto-2.jpg" alt="Gallery Photo 2">
                     </div>
                     <div class="photo-card">
-                        <img src="https://xatimg.com/image/50Xit1E66RuM.jpg" alt="Gallery Photo 3">
+                        <img src="galeria-foto-3.jpg" alt="Gallery Photo 3">
                     </div>
                     <div class="photo-card">
-                        <img src="https://xatimg.com/image/Av33X433FdxK.jpg" alt="Gallery Photo 4">
+                        <img src="galeria-foto-4.jpg" alt="Gallery Photo 4">
                     </div>
                 </div>
                 
@@ -701,10 +703,10 @@
         <div class="tab-content" id="tab-saoko">
             <div class="network-layout">
                 <!-- EDITAR TEXTO AQUI: Embed de grupo XAT Saoko -->
-                <iframe src="https://xat.com/embed/chat.php#id=220531447&gn=Saoko" allow="clipboard-write" width="650" height="486" frameborder="0" scrolling="no"></iframe><br><small><a target="_BLANK" href="https://xat.com/web_gear/chat/embed.php?id=220531447&GroupName=Saoko" <a target="_BLANK" href="https://xat.com/Saoko"</small><br>
+                <iframe src="https://xat.com/embed/chat.php#id=220531447&gn=Saoko" allow="clipboard-write" width="650" height="486" frameborder="0" scrolling="no"></iframe><br><small><a target="_BLANK" href="https://xat.com/web_gear/chat/embed.php?id=220531447&GroupName=Saoko">Get Saoko chat group</a> | <a target="_BLANK" href="https://xat.com/Saoko">Go to Saoko website</a></small><br>
                 
                 <!-- EDITAR IMAGEN AQUI: Imagen responsiva debajo del embed -->
-                <img src="https://i.ibb.co/2YRcNF5S/hello-kity.webp" alt="Saoko Image" style="max-width: 60%; width: 80px; height: auto; object-fit: contain; border-radius: 16px; margin-top: 0.5rem; flex-shrink: 0;">
+                <img src="saoko-imagen.webp" alt="Saoko Image" style="max-width: 60%; width: 80px; height: auto; object-fit: contain; border-radius: 16px; margin-top: 0.5rem; flex-shrink: 0;">
             </div>
         </div>
 
@@ -963,7 +965,7 @@
                     // Genera 6 destellos por cada click
                     for(let i = 0; i < 6; i++) {
                         const sparkle = document.createElement('img');
-                        sparkle.src = 'https://img.icons8.com/?size=48&id=N8DoP13woRV9&format=png';
+                        sparkle.src = 'sparkle.png';
                         sparkle.className = 'sparkle-particle';
                         
                         // Generar trayectoria circular aleatoria
