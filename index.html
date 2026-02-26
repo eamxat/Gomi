@@ -208,8 +208,13 @@
         .avatar-mini {
             width: 32px; height: 32px; border-radius: 50%; background: var(--bg-color-1);
             border: 2px solid white; overflow: hidden; display: flex; justify-content: center; align-items: center;
+            transition: var(--transition-smooth); /* NUEVO: Transición para el hover */
         }
         .avatar-mini img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* NUEVO: Zoom de 50px en el avatar */
+        .avatar-mini:hover { width: 50px; height: 50px; }
+
         .status-info { display: flex; align-items: center; gap: 0.4rem; }
         .status-text { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); }
         .status-dot {
@@ -244,8 +249,8 @@
             object-fit: contain; z-index: 1; opacity: 0.9; pointer-events: none;
         }
 
-        /* ESTRELLA REUBICADA AL RECUADRO ROJO */
-        .star-top { top: 40%; right: -10%; animation: starRotate 9s linear infinite; }
+        /* ESTRELLA REUBICADA EXACTAMENTE AL RECUADRO ROJO */
+        .star-top { top: -2%; right: 18%; animation: starRotate 9s linear infinite; }
         .star-bottom { bottom: 8%; left: -2%; animation: starRotateReverse 9s linear infinite; }
 
         @keyframes starRotate {
@@ -403,7 +408,7 @@
         /* =========================================
            9. SECCIÓN 3: NETWORK 
            ========================================= */
-        .network-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(1rem, 3vh, 2rem); width: 100%; height: 100%; position: relative; }
+        .network-layout { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: clamp(1rem, 3vh, 2rem); width: 100%; height: 100%; position: relative; }
         .network-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2vw, 2rem); width: 100%; max-width: 900px; }
         .network-card { background: rgba(255,255,255,0.5); border: 1px solid white; border-radius: 24px; padding: clamp(0.8rem, 2vh, 1.5rem); display: flex; flex-direction: column; align-items: center; text-align: center; gap: clamp(0.2rem, 1vh, 0.5rem); transition: var(--transition-smooth); }
         .net-avatar { width: clamp(45px, 8vh, 80px); height: clamp(45px, 8vh, 80px); border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: var(--shadow-sm); }
@@ -452,12 +457,13 @@
 
         .photo-card {
             flex: 0 0 auto; 
-            /* ASPECTO VERTICAL PARA ELIMINAR ESPACIO BLANCO */
-            width: clamp(200px, 55vw, 260px); 
-            height: clamp(300px, 60vh, 420px);
+            /* ASPECTO VERTICAL REDUCIDO PARA QUE NO SE VEAN TAN GRANDES */
+            width: clamp(160px, 40vw, 220px); 
+            height: clamp(240px, 50vh, 320px);
             background: rgba(255, 255, 255, 0.4); border: 1px solid white;
-            border-radius: 24px; padding: clamp(0.5rem, 1.5vh, 1rem); box-shadow: var(--shadow-sm);
+            border-radius: 24px; padding: 0; box-shadow: var(--shadow-sm);
             transition: var(--transition-smooth); display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
         }
         
         .photo-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
@@ -465,7 +471,8 @@
         .photo-card img { 
             width: 100%; height: 100%; 
             object-fit: cover; /* LLENADO PERFECTO DE LA FOTO EN VERTICAL */
-            border-radius: 16px; display: block; 
+            border-radius: 24px; /* BORDES REDONDEADOS VISIBLES */
+            display: block; 
             user-select: none; -webkit-user-drag: none; /* Evita drag fantasma del navegador */
         }
 
@@ -776,8 +783,8 @@
         </div>
 
         <!-- PESTAÑA 4: PHOTOS -->
-        <div class="tab-content" id="tab-photos">
-            <div class="network-layout" style="justify-content: flex-start; padding-top: 2vh;">
+        <div class="tab-content" id="tab-photos" style="align-items: flex-start;">
+            <div class="network-layout" style="justify-content: flex-start; height: auto; min-height: 100%; padding-top: 5vh; padding-bottom: 8vh;">
                 <div class="section-header">
                     <!-- EDITAR TEXTO AQUI: Título y descripción de la sección Photos -->
                     <h2 class="section-title" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
