@@ -46,7 +46,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         /* Solución a la sombra fantasma: oculta imágenes vacías o rotas para que no generen sombras */
-        img[src=""], img:not([src]) { opacity: 0 !important; pointer-events: none !important; }
+        img[src=""], img:not([src]) { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; box-shadow: none !important; }
 
         body {
             font-family: 'Outfit', sans-serif;
@@ -172,6 +172,10 @@
             border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight); border-radius: 32px;
             box-shadow: var(--shadow-lg); 
             position: relative; z-index: 10; overflow: hidden;
+            /* FIX GLITCH VISUAL: Forza la aceleración GPU para que el blur y las sombras no parpadeen */
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
         }
 
         /* =========================================
@@ -186,6 +190,10 @@
             overflow-y: auto; /* NUEVO: Permite scroll interno en móviles si el contenido es muy alto */
             overflow-x: hidden;
             scrollbar-width: none; /* SOPORTE FIREFOX: Oculta scrollbar general */
+            /* FIX GLITCH VISUAL: Capa aislada para evitar que elementos ocultos hagan "flicker" de sombras */
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            will-change: transform, opacity;
         }
         
         /* Ocultar scrollbar visualmente pero mantener funcionalidad para un look limpio */
@@ -352,6 +360,21 @@
         .v-main:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); }
 
         .v-main video { width: 100%; height: auto; display: block; border-radius: 32px; }
+
+        /* NUEVO: Firma sutil en Inicio */
+        .footer-signature {
+            position: absolute;
+            bottom: clamp(0.5rem, 2vh, 1.5rem);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            opacity: 0.6;
+            pointer-events: none;
+            white-space: nowrap;
+            letter-spacing: 0.05em;
+        }
 
         /* =========================================
            8. SECCIÓN 2: MÚSICA & VIDEOS 
@@ -722,6 +745,9 @@
                     <div id="pink-clock" class="pink-clock">00:00:00 AM</div>
                 </div>
             </div>
+            
+            <!-- NUEVO: Firma sutil -->
+            <div class="footer-signature">©2026 Eam96 Xatspace Design</div>
         </div>
 
         <!-- PESTAÑA 2: MÚSICA -->
@@ -785,13 +811,13 @@
                         <img src="avatar-teki.png" alt="Avatar" class="friend-avatar">
                         Teki
                     </a>
-                    <a href="https://xat.me/fran" target="_blank" class="btn-secondary friend-btn">
-                        <img src="avatar-franco.png" alt="Avatar" class="friend-avatar">
-                        Franco
-                    </a>
                     <a href="https://xat.me/Xpiitu" target="_blank" class="btn-secondary friend-btn">
                         <img src="avatar-pitu.png" alt="Avatar" class="friend-avatar">
                         Pitu
+                    </a>
+                    <a href="https://xat.me/fran" target="_blank" class="btn-secondary friend-btn">
+                        <img src="avatar-franco.png" alt="Avatar" class="friend-avatar">
+                        Franco
                     </a>
                     <a href="https://xat.me/ELV1S" target="_blank" class="btn-secondary friend-btn">
                         <img src="avatar-elvis.png" alt="Avatar" class="friend-avatar">
@@ -1253,7 +1279,6 @@
     </script>
 </body>
 </html>
-
 
 
 
