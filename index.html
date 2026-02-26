@@ -185,6 +185,7 @@
             display: flex; align-items: center; justify-content: center;
             overflow-y: auto; /* NUEVO: Permite scroll interno en móviles si el contenido es muy alto */
             overflow-x: hidden;
+            scrollbar-width: none; /* SOPORTE FIREFOX: Oculta scrollbar general */
         }
         
         /* Ocultar scrollbar visualmente pero mantener funcionalidad para un look limpio */
@@ -243,7 +244,8 @@
             object-fit: contain; z-index: 1; opacity: 0.9; pointer-events: none;
         }
 
-        .star-top { top: 22%; right: 8%; animation: starRotate 9s linear infinite; }
+        /* ESTRELLA REUBICADA AL RECUADRO ROJO */
+        .star-top { top: 40%; right: -10%; animation: starRotate 9s linear infinite; }
         .star-bottom { bottom: 8%; left: -2%; animation: starRotateReverse 9s linear infinite; }
 
         @keyframes starRotate {
@@ -436,17 +438,23 @@
             flex: 1; overflow-x: auto; overflow-y: hidden; padding: 0 1rem 2rem 1rem; align-items: center; justify-content: flex-start;
             -webkit-overflow-scrolling: touch; /* NUEVO: Scroll suave nativo en iOS */
             cursor: grab; /* Indica que se puede arrastrar */
+            
+            /* SOPORTE FIREFOX: Scrollbar rosa y fino */
+            scrollbar-width: thin; 
+            scrollbar-color: rgba(255, 105, 180, 0.5) transparent; 
         }
         .photo-gallery:active { cursor: grabbing; }
         
-        /* Scrollbar personalizado y sutil para la galería (ahora horizontal) */
+        /* Scrollbar personalizado y sutil para la galería (ahora horizontal) CHROME/SAFARI/EDGE */
         .photo-gallery::-webkit-scrollbar { height: 6px; }
         .photo-gallery::-webkit-scrollbar-track { background: transparent; }
         .photo-gallery::-webkit-scrollbar-thumb { background: rgba(255, 105, 180, 0.5); border-radius: 10px; }
 
         .photo-card {
-            flex: 0 0 auto; /* Evita que las imágenes se deformen o encojan en móvil */
-            width: clamp(220px, 60vw, 300px); height: 100%; max-height: 45vh;
+            flex: 0 0 auto; 
+            /* ASPECTO VERTICAL PARA ELIMINAR ESPACIO BLANCO */
+            width: clamp(200px, 55vw, 260px); 
+            height: clamp(300px, 60vh, 420px);
             background: rgba(255, 255, 255, 0.4); border: 1px solid white;
             border-radius: 24px; padding: clamp(0.5rem, 1.5vh, 1rem); box-shadow: var(--shadow-sm);
             transition: var(--transition-smooth); display: flex; justify-content: center; align-items: center;
@@ -455,7 +463,8 @@
         .photo-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
         
         .photo-card img { 
-            width: 100%; height: 100%; object-fit: contain; 
+            width: 100%; height: 100%; 
+            object-fit: cover; /* LLENADO PERFECTO DE LA FOTO EN VERTICAL */
             border-radius: 16px; display: block; 
             user-select: none; -webkit-user-drag: none; /* Evita drag fantasma del navegador */
         }
@@ -1225,8 +1234,6 @@
     </script>
 </body>
 </html>
-
-
 
 
 
