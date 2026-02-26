@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gomi Xatspace</title>
+    <style>
+        /* =========================================
+           1. FUENTES Y VARIABLES DEL SISTEMA 
+           ========================================= */
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Oleo+Script:wght@700&display=swap');
+
+        :root {
+            --bg-color-1: #FFEAEE; 
+            --bg-color-2: #F2E8FF; 
+            --accent-main: #E883A6; 
+            --accent-hover: #D86B93; 
+            --accent-bright: #FF69B4; 
+            --text-dark: #C44577; 
+            --text-muted: #D67096; 
+            
+            --glass-bg: rgba(255, 255, 255, 0.25); 
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-highlight: rgba(255, 255, 255, 0.8);
+            
+            --shadow-sm: 0 4px 12px rgba(232, 131, 166, 0.1);
+            --shadow-md: 0 8px 24px -4px rgba(232, 131, 166, 0.15);
+            --shadow-lg: 0 16px 40px -8px rgba(232, 131, 166, 0.2);
+            --shadow-hover: 0 24px 48px -12px rgba(232, 131, 166, 0.3);
+            
+            --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* =========================================
+           2. RESET, 100VH LAYOUT & CURSOR
+           ========================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--bg-color-1);
+            overflow: hidden; 
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            padding-top: 65px; /* NUEVO: Padding global para compensar banner externo */
+        }
+
+        @media (pointer: fine) {
+            * { cursor: none !important; }
+            .custom-cursor {
+                position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+                width: 32px; height: 32px; transform: translate(-50%, -50%);
+                transition: transform 0.1s ease-out;
+                display: flex; justify-content: center; align-items: center;
+            }
+            .custom-cursor::after {
+                content: '';
+                width: 100%; height: 100%;
+                background: url('https://i.imgur.com/akb3zac.png') no-repeat center;
+                background-size: contain;
+                filter: drop-shadow(0 0 5px rgba(255, 105, 180, 0.5));
+            }
+            .custom-cursor.click { transform: translate(-50%, -50%) scale(0.8); }
+            
+            .cursor-trail {
+                position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998;
+                width: 10px; height: 10px; border-radius: 50%;
+                background: var(--accent-bright); filter: blur(4px);
+                transform: translate(-50%, -50%); transition: 0.1s linear; opacity: 0.4;
+            }
+        }
+
+        /* =========================================
+           3. BACKGROUND ANIMADO
+           ========================================= */
+        #bg-video {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            object-fit: cover; z-index: -3; pointer-events: none; opacity: 1;
+        }
+
+        #particles-canvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -1;
+        }
+
+        #cursor-canvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9997; /* Por encima del contenedor principal */
+        }
+
+        .ambient-background {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
+            background: linear-gradient(135deg, rgba(255, 234, 238, 0.4), rgba(242, 232, 255, 0.45));
+            pointer-events: none;
+        }
+
+        .clouds-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -2; overflow: hidden;
+        }
+        .cloud {
+            position: absolute; background: #FFF; border-radius: 200px;
+            filter: blur(15px); opacity: 0.3; animation: drift linear infinite;
+        }
+        .cloud::before, .cloud::after { content: ''; position: absolute; background: #FFF; border-radius: 50%; }
+        .cloud-1 { width: 300px; height: 100px; top: 15%; left: -350px; animation-duration: 45s; }
+        .cloud-1::before { width: 150px; height: 150px; top: -70px; left: 40px; }
+        .cloud-1::after { width: 120px; height: 120px; top: -50px; left: 140px; }
+        .cloud-2 { width: 250px; height: 80px; top: 65%; left: -300px; animation-duration: 60s; opacity: 0.2; }
+        .cloud-2::before { width: 120px; height: 120px; top: -60px; left: 30px; }
+        .cloud-2::after { width: 100px; height: 100px; top: -40px; left: 110px; }
+        .cloud-3 { width: 400px; height: 120px; top: 35%; left: -500px; animation-duration: 75s; opacity: 0.25; transform: scale(1.2); }
+        .cloud-3::before { width: 180px; height: 180px; top: -90px; left: 50px; }
+        .cloud-3::after { width: 140px; height: 140px; top: -60px; left: 160px; }
+        @keyframes drift { from { transform: translateX(-15vw); } to { transform: translateX(115vw); } }
+
+        /* =========================================
+           4. NAVBAR
+           ========================================= */
+        .navbar {
+            position: fixed;
+            top: calc(clamp(1rem, 3vh, 2rem) + 65px); /* NUEVO: Compensado por el padding global */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.3); 
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight);
+            border-radius: 100px; padding: 0.5rem 1rem; display: flex; gap: clamp(0.2rem, 1vw, 0.5rem);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-link {
+            text-decoration: none; color: var(--text-dark);
+            font-size: clamp(0.75rem, 1.5vh, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+            padding: clamp(0.4rem, 1vh, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
+            border-radius: 100px; transition: var(--transition-smooth); cursor: pointer; border: none; background: transparent; font-family: inherit;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--accent-main); background: rgba(255, 255, 255, 0.8); box-shadow: var(--shadow-sm);
+        }
+
+        /* =========================================
+           5. CONTENEDOR PRINCIPAL
+           ========================================= */
+        .main-glass-panel {
+            width: 90vw; max-width: 1200px; height: clamp(500px, 80vh, 85vh); 
+            margin-top: clamp(3rem, 8vh, 5rem); 
+            background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight); border-radius: 32px;
+            box-shadow: var(--shadow-lg); 
+            position: relative; z-index: 10; overflow: hidden;
+        }
+
+        /* =========================================
+           6. SISTEMA DE PESTAÑAS
+           ========================================= */
+        .tab-content {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding: clamp(1.5rem, 4vh, 4rem); opacity: 0; pointer-events: none;
+            transform: translateY(20px) scale(0.98); transition: var(--transition-smooth);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .tab-content.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+
+        /* =========================================
+           7. SECCIÓN 1: INICIO (HERO)
+           ========================================= */
+        .hero-layout { display: grid; grid-template-columns: 1fr 1fr; width: 100%; height: 100%; gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+        .hero-content { display: flex; flex-direction: column; gap: clamp(1rem, 2vh, 1.5rem); }
+
+        .status-container {
+            display: flex; align-items: center; gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.5); padding: 0.4rem 0.8rem;
+            border-radius: 50px; width: fit-content; border: 1px solid white;
+            margin-bottom: 0.5rem; box-shadow: var(--shadow-sm);
+        }
+        .avatar-mini {
+            width: 32px; height: 32px; border-radius: 50%; background: var(--bg-color-1);
+            border: 2px solid white; overflow: hidden; display: flex; justify-content: center; align-items: center;
+        }
+        .avatar-mini img { width: 100%; height: 100%; object-fit: cover; }
+        .status-info { display: flex; align-items: center; gap: 0.4rem; }
+        .status-text { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); }
+        .status-dot {
+            width: 8px; height: 8px; background: #2ecc71; border-radius: 50%;
+            box-shadow: 0 0 8px #2ecc71; animation: pulse-green 1.5s infinite;
+        }
+        .status-year { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-left: 0.2rem; }
+
+        @keyframes pulse-green {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .hero-title-wrapper {
+            display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem;
+            position: relative;
+        }
+
+        .hero-title {
+            display: flex; align-items: center; gap: 1rem; margin: 0; padding: 0;
+            position: relative; z-index: 2;
+        }
+        
+        .hero-text-img-gomi {
+            height: clamp(8rem, 25vh, 20rem); width: auto; object-fit: contain;
+            filter: drop-shadow(0px 6px 8px rgba(0, 0, 0, 0.15)) drop-shadow(0px 0px 18px rgba(255, 105, 180, 0.5));
+        }
+
+        .hero-star {
+            position: absolute; width: clamp(2.5rem, 6vh, 4.5rem); height: auto;
+            object-fit: contain; z-index: 1; opacity: 0.9; pointer-events: none;
+        }
+
+        .star-top { top: 35%; right: 18%; animation: starRotate 9s linear infinite; }
+        .star-bottom { bottom: 8%; left: -2%; animation: starRotateReverse 9s linear infinite; }
+
+        @keyframes starRotate {
+            0% { transform: translateX(0px) rotate(0deg); }
+            50% { transform: translateX(5px) rotate(180deg); }
+            100% { transform: translateX(0px) rotate(360deg); }
+        }
+        @keyframes starRotateReverse {
+            0% { transform: translateX(0px) rotate(360deg); }
+            50% { transform: translateX(-5px) rotate(180deg); }
+            100% { transform: translateX(0px) rotate(0deg); }
+        }
+
+        .hero-text-block { display: flex; flex-direction: column; gap: clamp(0.2rem, 1vh, 0.5rem); }
+        
+        /* Clase añadida exclusivamente para el Fade de las frases */
+        .fade-text { transition: opacity 0.8s ease-in-out; opacity: 1; }
+        .fade-text.hidden { opacity: 0; }
+        
+        .hero-subtitle { font-size: clamp(1rem, 2vh, 1.25rem); font-weight: 700; color: var(--text-dark); }
+        .hero-description { font-size: clamp(0.85rem, 1.6vh, 1rem); font-weight: 500; color: var(--text-muted); max-width: 95%; line-height: 1.5; }
+
+        /* =========================================
+           NUEVO: GEMINI & BOTÓN CLICK ME
+           ========================================= */
+        .gemini-block {
+            display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .gemini-title {
+            display: flex; flex-direction: row; align-items: center; gap: 0.5rem;
+            font-size: clamp(1rem, 2vh, 1.2rem); font-weight: 700; color: var(--accent-main);
+        }
+        .gemini-title img { height: 1.5em; width: auto; object-fit: contain; flex-shrink: 0; }
+        
+        .btn-click-me {
+            position: relative; background: rgba(255, 255, 255, 0.5); border: 1px solid var(--accent-bright);
+            color: var(--accent-main); border-radius: 50px; padding: 0.3rem 1rem;
+            font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: var(--transition-smooth);
+            font-family: inherit; overflow: visible; text-transform: uppercase;
+        }
+        .btn-click-me:hover { background: var(--accent-main); color: white; box-shadow: var(--shadow-sm); }
+        
+        .sparkle-particle {
+            position: absolute; width: 24px; height: 24px; pointer-events: none; z-index: 10;
+            animation: sparkleFly 0.6s ease-out forwards;
+        }
+        @keyframes sparkleFly {
+            0% { transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(90deg); opacity: 0; }
+        }
+
+        .hero-actions { display: flex; gap: 1rem; margin-top: 0.5vh; }
+        
+        .btn-primary, .btn-secondary {
+            text-decoration: none; border-radius: 100px; font-weight: 700; font-size: clamp(0.8rem, 1.5vh, 0.9rem);
+            padding: clamp(0.6rem, 1.5vh, 0.8rem) clamp(1.5rem, 3vw, 2rem); transition: var(--transition-smooth); text-align: center; border: 2px solid transparent;
+        }
+        
+        .btn-primary { background: var(--accent-main); color: white; box-shadow: var(--shadow-md); cursor: pointer; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); background: var(--accent-hover); }
+
+        .btn-secondary { background: rgba(255, 255, 255, 0.5); color: var(--text-dark); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
+        .btn-secondary:hover { background: white; color: var(--accent-hover); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+        .hero-visuals { display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; }
+
+        .v-main { 
+            width: clamp(350px, 45vw, 750px); height: auto; border-radius: 32px;
+            box-shadow: var(--shadow-lg); transition: var(--transition-smooth);
+            display: block; overflow: hidden;
+        }
+        .v-main:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); }
+
+        .v-main video { width: 100%; height: auto; display: block; border-radius: 32px; }
+
+        /* =========================================
+           8. SECCIÓN 2: MÚSICA & VIDEOS 
+           ========================================= */
+        .music-layout { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: clamp(1rem, 3vh, 2rem); width: 100%; height: 100%; padding-top: 2vh; }
+        .section-header { text-align: center; }
+        .section-title { font-family: 'Oleo Script', cursive; font-size: clamp(2.5rem, 6vh, 4rem); color: var(--accent-main); line-height: 1; text-shadow: 0 2px 10px rgba(255,255,255,0.8);}
+
+        .music-content { display: flex; flex-direction: row; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; }
+
+        .player-pro { display: flex; flex-direction: column; align-items: center; gap: clamp(1.5rem, 3vh, 2rem); position: relative; width: 100%; max-width: 350px; z-index: 5; }
+
+        .player-disc {
+            width: clamp(140px, 25vh, 220px); height: clamp(140px, 25vh, 220px);
+            border-radius: 50%; background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
+            border: 1px solid var(--glass-highlight); box-shadow: var(--shadow-md), inset 0 4px 20px rgba(255,255,255,0.6);
+            display: flex; justify-content: center; align-items: center; position: relative;
+        }
+
+        .player-disc::before, .player-disc::after {
+            content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            border: 1px solid var(--accent-main); opacity: 0; transition: var(--transition-smooth);
+        }
+        .is-playing .player-disc::before { animation: soundRipple 2s linear infinite; }
+        .is-playing .player-disc::after { animation: soundRipple 2s linear infinite 1s; }
+
+        .btn-play {
+            width: clamp(50px, 10vh, 80px); height: clamp(50px, 10vh, 80px);
+            background: var(--accent-main); border-radius: 50%; border: 4px solid white;
+            box-shadow: 0 8px 24px rgba(232, 131, 166, 0.4); display: flex; justify-content: center; align-items: center; transition: var(--transition-smooth); z-index: 10; cursor: pointer;
+        }
+        .btn-play svg { width: clamp(18px, 3vh, 28px); fill: white; margin-left: 4px; transition: var(--transition-smooth); }
+
+        .player-controls { width: 100%; background: white; padding: clamp(0.6rem, 1.5vh, 1rem) 1.5rem; border-radius: 100px; display: flex; align-items: center; gap: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--glass-border); }
+        .icon-svg { width: clamp(14px, 2.5vh, 18px); fill: var(--text-muted); }
+        .volume-slider { -webkit-appearance: none; width: 100%; height: 4px; background: var(--bg-color-2); border-radius: 2px; outline: none; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-main); box-shadow: 0 2px 6px rgba(232, 131, 166, 0.4); transition: transform 0.2s; cursor: pointer; }
+
+        .v-music {
+            position: absolute; height: clamp(150px, 32vh, 300px); aspect-ratio: 1 / 1;
+            background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.75);
+            border-radius: 16px; padding: 4px; box-shadow: var(--shadow-sm); transition: var(--transition-smooth);
+        }
+        .v-music video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+
+        .pos-tl { top: -2%; left: 3%; }
+        .pos-br { bottom: -2%; right: 3%; }
+
+        /* =========================================
+           9. SECCIÓN 3: NETWORK 
+           ========================================= */
+        .network-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(1rem, 3vh, 2rem); width: 100%; height: 100%; position: relative; }
+        .network-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2vw, 2rem); width: 100%; max-width: 900px; }
+        .network-card { background: rgba(255,255,255,0.5); border: 1px solid white; border-radius: 24px; padding: clamp(0.8rem, 2vh, 1.5rem); display: flex; flex-direction: column; align-items: center; text-align: center; gap: clamp(0.2rem, 1vh, 0.5rem); transition: var(--transition-smooth); }
+        .net-avatar { width: clamp(45px, 8vh, 80px); height: clamp(45px, 8vh, 80px); border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: var(--shadow-sm); }
+        .net-name { font-family: 'Oleo Script', cursive; font-size: clamp(1.2rem, 2.5vh, 1.5rem); color: var(--accent-main); line-height: 1; }
+
+        .network-mascot { position: absolute; bottom: 2%; right: 2%; width: clamp(80px, 15vh, 160px); z-index: 20; filter: drop-shadow(0 15px 25px rgba(232, 131, 166, 0.3)); animation: floatMascot 4s ease-in-out infinite; pointer-events: none; }
+        @keyframes floatMascot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        /* NUEVAS CLASES PARA BOTONES DE FRIENDS */
+        .friends-list {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(1rem, 2vw, 1.5rem);
+            width: 100%; max-width: 600px; margin-top: 1vh;
+        }
+        .friend-btn {
+            min-width: 130px; font-size: clamp(0.9rem, 1.8vh, 1.1rem);
+            display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 0.5rem;
+            padding-left: 0.8rem; /* Ajuste sutil para balancear el avatar */
+        }
+        .friend-avatar {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            flex-shrink: 0; /* Previene cualquier deformación del avatar */
+        }
+
+        /* =========================================
+           11. PHOTOS GALLERY
+           ========================================= */
+        .photo-gallery {
+            display: flex; flex-direction: row; gap: 1.5rem; width: 100%;
+            flex: 1; overflow-x: auto; overflow-y: hidden; padding: 0 1rem 2rem 1rem; align-items: center; justify-content: flex-start;
+        }
+        
+        /* Scrollbar personalizado y sutil para la galería (ahora horizontal) */
+        .photo-gallery::-webkit-scrollbar { height: 6px; }
+        .photo-gallery::-webkit-scrollbar-track { background: transparent; }
+        .photo-gallery::-webkit-scrollbar-thumb { background: rgba(255, 105, 180, 0.5); border-radius: 10px; }
+
+        .photo-card {
+            flex: 1 1 0; min-width: 220px; height: 100%; max-height: 45vh;
+            background: rgba(255, 255, 255, 0.4); border: 1px solid white;
+            border-radius: 24px; padding: clamp(0.5rem, 1.5vh, 1rem); box-shadow: var(--shadow-sm);
+            transition: var(--transition-smooth); display: flex; justify-content: center; align-items: center;
+        }
+        
+        .photo-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+        
+        .photo-card img { 
+            width: 100%; height: 100%; object-fit: contain; 
+            border-radius: 16px; display: block; 
+        }
+
+        /* =========================================
+           12. INTRO SCREEN
+           ========================================= */
+        #intro-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 9995; /* Por debajo del cursor pero sobre todo lo demás */
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            padding-bottom: 15vh; /* Baja el botón sin romper animaciones */
+            background: var(--bg-color-1);
+            transition: opacity 0.8s ease-in-out;
+        }
+        #intro-screen video {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -1;
+        }
+        .intro-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Estilo específico Glass Morph Rosa para el botón de Ingreso */
+        .btn-glass-pink {
+            position: relative;
+            background: rgba(255, 182, 193, 0.25); /* Rosa translúcido */
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50px; padding: 1rem 3rem; font-size: 1.5rem;
+            font-weight: 700; color: var(--text-dark); cursor: pointer;
+            transition: var(--transition-smooth); font-family: inherit;
+            box-shadow: 0 8px 32px rgba(232, 131, 166, 0.25), inset 0 0 10px rgba(255, 255, 255, 0.3);
+            text-transform: uppercase; letter-spacing: 0.05em; z-index: 2;
+        }
+        .btn-glass-pink:hover {
+            background: rgba(255, 182, 193, 0.45); transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(232, 131, 166, 0.35), inset 0 0 15px rgba(255, 255, 255, 0.5);
+            color: var(--accent-main);
+        }
+
+        /* =========================================
+           10. RESPONSIVE DESIGN
+           ========================================= */
+        @media (max-width: 992px) {
+            .hero-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 1rem; text-align: center; justify-items: center;}
+            .hero-content { align-items: center; }
+            .gemini-block { align-items: center; } /* Centra el botón Gemini en móvil */
+            .hero-title-wrapper { align-items: center; }
+            .hero-visuals { width: 100%; max-width: 600px; height: auto; min-height: 20vh;}
+            .music-content { flex-direction: column; justify-content: center; gap: 1rem; }
+            .v-music.pos-tl, .v-music.pos-br { position: relative; top: auto; left: auto; bottom: auto; right: auto; height: clamp(100px, 18vh, 150px); }
+            .network-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        }
+
+        @media (max-width: 600px) {
+            .navbar { width: 95%; border-radius: 20px; flex-wrap: wrap; justify-content: center; padding: 0.5rem; }
+            .nav-link { font-size: 0.7rem; padding: 0.4rem 0.6rem; }
+            .main-glass-panel { width: 95vw; height: clamp(500px, 85vh, 88vh); padding: 1rem; margin-top: clamp(4rem, 10vh, 5rem); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================
+         NUEVO: PANTALLA DE INTRODUCCIÓN
+         ========================================= -->
+    <div id="intro-screen">
+        <!-- EDITAR TEXTO AQUI: URL del video de fondo de la intro (formato raw para que cargue) -->
+        <video autoplay loop muted playsinline src="https://raw.githubusercontent.com/eamxat/Gomi/main/pink-hello-kitty-on-cloud.1920x1080.mp4"></video>
+        <!-- EDITAR TEXTO AQUI: Texto del botón de la intro -->
+        <button id="btn-enter" class="btn-glass-pink">ingresar</button>
+    </div>
+
+    <!-- VIDEO DE FONDO PRINCIPAL -->
+    <!-- EDITAR TEXTO AQUI: URL del video de fondo principal -->
+    <video id="bg-video" src="https://cdn.pixabay.com/video/2024/09/03/229545_large.mp4" autoplay loop muted playsinline></video>
+
+    <!-- AMBIENTE -->
+    <div class="ambient-background"></div>
+    <div class="clouds-container">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+    <canvas id="particles-canvas"></canvas>
+    <canvas id="cursor-canvas"></canvas>
+
+    <!-- EDITAR TEXTO AQUI: URL del audio de fondo -->
+    <audio id="audio-player" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <nav class="navbar">
+        <!-- EDITAR TEXTO AQUI: Textos del menú de navegación superior -->
+        <button class="nav-link active" data-target="tab-hero">Inicio</button>
+        <button class="nav-link" data-target="tab-music">Música</button>
+        <button class="nav-link" data-target="tab-network">Friends</button>
+        <button class="nav-link" data-target="tab-photos">Photos</button>
+        <button class="nav-link" data-target="tab-saoko">Saoko</button>
+    </nav>
+
+    <main class="main-glass-panel">
+        
+        <!-- PESTAÑA 1: HERO -->
+        <div class="tab-content active" id="tab-hero">
+            <div class="hero-layout">
+                <div class="hero-content">
+                    <div class="status-container">
+                        <div class="avatar-mini">
+                            <!-- EDITAR TEXTO AQUI: Avatar del status container -->
+                            <img src="https://i.ibb.co/rose1.jpg" alt="Avatar" onerror="this.src='https://via.placeholder.com/100/FFEAEE/C44577?text=G'">
+                        </div>
+                        <div class="status-info">
+                            <span class="status-dot"></span>
+                            <!-- EDITAR TEXTO AQUI: Estado en línea de la etiqueta superior -->
+                            <span class="status-text">En línea</span>
+                            <span class="status-year">Gomi (2025)</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-title-wrapper">
+                        <h1 class="hero-title">
+                            <!-- EDITAR TEXTO AQUI: Título imagen GOMI -->
+                            <img src="https://i.ibb.co/bjLNjfQb/texto-gomi.png" alt="Gomi" class="hero-text-img-gomi">
+                        </h1>
+                        <!-- EDITAR TEXTO AQUI: Imágenes de estrellas animadas -->
+                        <img src="https://i.ibb.co/zWRDKZ8T/estrella2.png" alt="Estrella" class="hero-star star-top">
+                        <img src="https://i.ibb.co/jZwqLR1d/estrella1.png" alt="Estrella" class="hero-star star-bottom">
+                    </div>
+                    <div class="hero-text-block">
+                        <div id="quote-content" class="fade-text">
+                            <!-- NOTA: Las frases de este fade se editan en el JS de abajo, no aquí -->
+                            <p class="hero-subtitle" id="quote-title">🩷Una bad bitch girl de los noventas.🩷</p>
+                            <p class="hero-description" id="quote-desc"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Apartado GEMINI -->
+                    <div class="gemini-block">
+                        <div class="gemini-title">
+                            <!-- EDITAR TEXTO AQUI: Texto de Gemini -->
+                            <span>GEMINI</span>
+                            <!-- EDITAR TEXTO AQUI: Ícono Gemini -->
+                            <img src="https://img.icons8.com/?size=96&id=vCMmqpZyjJv4&format=png" alt="Gemini Icon">
+                        </div>
+                        <!-- EDITAR TEXTO AQUI: Botón Click Me -->
+                        <button class="btn-click-me" id="btn-click-me">click me</button>
+                    </div>
+
+                </div>
+
+                <div class="hero-visuals">
+                    <div class="v-main js-parallax" data-depth="0.05">
+                        <!-- EDITAR TEXTO AQUI: Video principal de inicio -->
+                        <video src="https://i.imgur.com/wy6PseX.mp4" autoplay loop muted playsinline></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2: MÚSICA -->
+        <div class="tab-content" id="tab-music">
+            <div class="music-layout">
+                <div class="section-header">
+                    <!-- EDITAR TEXTO AQUI: Título y descripción de la sección Música -->
+                    <h2 class="section-title">Auditory Atmosphere</h2>
+                    <p class="hero-description" style="margin: 0 auto;">Set the mood with the curated background track.</p>
+                </div>
+                
+                <div class="music-content">
+                    <div class="v-music pos-tl js-parallax" data-depth="0.08">
+                        <!-- EDITAR TEXTO AQUI: Video pequeño izquierdo de Música -->
+                        <video src="https://i.imgur.com/uTtS0VA.mp4" autoplay loop muted playsinline></video>
+                    </div>
+
+                    <div class="player-pro" id="music-ui">
+                        <div class="player-disc js-parallax" data-depth="0.05">
+                            <div class="btn-play" id="btn-play-pause">
+                                <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                <svg id="icon-pause" viewBox="0 0 24 24" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </div>
+                        </div>
+
+                        <div class="player-controls">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                            <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.01" value="0.3">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="v-music pos-br js-parallax" data-depth="-0.06">
+                        <!-- EDITAR TEXTO AQUI: Video pequeño derecho de Música -->
+                        <video src="https://i.imgur.com/PvtXPKc.mp4" autoplay loop muted playsinline></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3: NETWORK -->
+        <div class="tab-content" id="tab-network">
+            <div class="network-layout">
+                <div class="section-header">
+                    <!-- EDITAR TEXTO AQUI: Título y descripción de la sección Friends -->
+                    <h2 class="section-title">Friends</h2>
+                    <p class="hero-description" style="margin: 0 auto;">Connections shaping the digital luxury space.</p>
+                </div>
+
+                <div class="friends-list">
+                    <!-- EDITAR TEXTO AQUI: Botones de amigos (Puedes cambiar el src de img por sus avatares reales) -->
+                    <a href="https://xat.me/kiti" target="_blank" class="btn-secondary friend-btn">
+                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=T" alt="Avatar" class="friend-avatar">
+                        Teki
+                    </a>
+                    <a href="https://xat.me/fran" target="_blank" class="btn-secondary friend-btn">
+                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=F" alt="Avatar" class="friend-avatar">
+                        Franco
+                    </a>
+                    <a href="https://xat.me/Xpiitu" target="_blank" class="btn-secondary friend-btn">
+                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=P" alt="Avatar" class="friend-avatar">
+                        Pitu
+                    </a>
+                    <a href="https://xat.me/ELV1S" target="_blank" class="btn-secondary friend-btn">
+                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=E" alt="Avatar" class="friend-avatar">
+                        Elvis
+                    </a>
+                    <a href="https://xat.me/Epika" target="_blank" class="btn-secondary friend-btn">
+                        <img src="https://via.placeholder.com/100/FFEAEE/C44577?text=E" alt="Avatar" class="friend-avatar">
+                        Epika
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 4: PHOTOS -->
+        <div class="tab-content" id="tab-photos">
+            <div class="network-layout" style="justify-content: flex-start; padding-top: 2vh;">
+                <div class="section-header">
+                    <!-- EDITAR TEXTO AQUI: Título y descripción de la sección Photos -->
+                    <h2 class="section-title">Photos</h2>
+                    <p class="hero-description" style="margin: 0 auto; margin-bottom: 1rem;">Aesthetic visual gallery.</p>
+                </div>
+                
+                <div class="photo-gallery">
+                    <div class="photo-card">
+                        <!-- EDITAR TEXTO AQUI: Fotos de galería -->
+                        <img src="https://xatimg.com/image/mDAMWWOZSD76.jpg" alt="Gallery Photo 1">
+                    </div>
+                    <div class="photo-card">
+                        <img src="https://xatimg.com/image/uKQV0yEqGtvr.jpg" alt="Gallery Photo 2">
+                    </div>
+                    <div class="photo-card">
+                        <img src="https://xatimg.com/image/50Xit1E66RuM.jpg" alt="Gallery Photo 3">
+                    </div>
+                    <div class="photo-card">
+                        <img src="https://xatimg.com/image/mDAMWWOZSD76.jpg" alt="Gallery Photo 4">
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- PESTAÑA 5: SAOKO -->
+        <div class="tab-content" id="tab-saoko">
+            <div class="network-layout">
+                <!-- EDITAR TEXTO AQUI: Embed de grupo XAT Saoko -->
+                <iframe src="https://xat.com/embed/chat.php#id=220531447&gn=Saoko" allow="clipboard-write" width="650" height="486" frameborder="0" scrolling="no"></iframe><br><small><a target="_BLANK" href="https://xat.com/web_gear/chat/embed.php?id=220531447&GroupName=Saoko">Get Saoko chat group</a> | <a target="_BLANK" href="https://xat.com/Saoko"> Go to Saoko website</a></small><br>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            const cursorCanvas = document.getElementById('cursor-canvas');
+            const cursorCtx = cursorCanvas.getContext('2d');
+            let particles = [];
+            let cursorParticles = []; // Partículas del cursor
+            
+            let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+
+            // --- 0. CUSTOM CURSOR & EMITTER ---
+            if (window.matchMedia("(pointer: fine)").matches) {
+                const cursor = document.createElement('div');
+                cursor.classList.add('custom-cursor');
+                const trail = document.createElement('div');
+                trail.classList.add('cursor-trail');
+                document.body.appendChild(cursor);
+                document.body.appendChild(trail);
+                
+                let trailX = mouseX, trailY = mouseY;
+                
+                window.addEventListener('mousemove', e => {
+                    mouseX = e.clientX; mouseY = e.clientY;
+                    cursor.style.left = mouseX + 'px';
+                    cursor.style.top = mouseY + 'px';
+                    
+                    // Generar 1-2 partículas por movimiento
+                    for(let i=0; i<2; i++) {
+                        cursorParticles.push(new CursorStar(mouseX, mouseY));
+                    }
+                });
+                
+                const renderTrail = () => {
+                    trailX += (mouseX - trailX) * 0.2;
+                    trailY += (mouseY - trailY) * 0.2;
+                    trail.style.left = trailX + 'px';
+                    trail.style.top = trailY + 'px';
+                    requestAnimationFrame(renderTrail);
+                };
+                renderTrail();
+                
+                window.addEventListener('mousedown', () => cursor.classList.add('click'));
+                window.addEventListener('mouseup', () => cursor.classList.remove('click'));
+            }
+
+            // --- 1. TABS ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const tabs = document.querySelectorAll('.tab-content');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('data-target');
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    tabs.forEach(t => t.classList.remove('active'));
+                    link.classList.add('active');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+            // --- 2. AUDIO PLAYER ---
+            const audio = document.getElementById('audio-player');
+            const btnPlayPause = document.getElementById('btn-play-pause');
+            const iconPlay = document.getElementById('icon-play');
+            const iconPause = document.getElementById('icon-pause');
+            const volumeSlider = document.getElementById('volume-slider');
+            const musicUI = document.getElementById('music-ui');
+            let isPlaying = false;
+            audio.volume = volumeSlider.value;
+            btnPlayPause.addEventListener('click', () => {
+                if (isPlaying) {
+                    audio.pause();
+                    iconPlay.style.display = 'block';
+                    iconPause.style.display = 'none';
+                    musicUI.classList.remove('is-playing');
+                } else {
+                    audio.play().catch(e => console.log("Auto-play prevented"));
+                    iconPlay.style.display = 'none';
+                    iconPause.style.display = 'block';
+                    musicUI.classList.add('is-playing');
+                }
+                isPlaying = !isPlaying;
+            });
+            volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
+
+            // --- 3. LOGICA PANTALLA INTRODUCCION ---
+            const introScreen = document.getElementById('intro-screen');
+            const btnEnter = document.getElementById('btn-enter');
+            
+            if (btnEnter && introScreen) {
+                btnEnter.addEventListener('click', () => {
+                    // Ocultar pantalla
+                    introScreen.classList.add('intro-hidden');
+                    setTimeout(() => {
+                        introScreen.style.display = 'none';
+                    }, 800);
+                    
+                    // Activar autoplay de la música
+                    if (!isPlaying) {
+                        audio.play().then(() => {
+                            iconPlay.style.display = 'none';
+                            iconPause.style.display = 'block';
+                            musicUI.classList.add('is-playing');
+                            isPlaying = true;
+                        }).catch(e => console.log("Autoplay bloqueado:", e));
+                    }
+                });
+            }
+
+            // --- 4. PARALLAX ---
+            let pCurrentX = 0, pCurrentY = 0;
+            const pLerp = (start, end, factor) => start + (end - start) * factor;
+            const renderParallax = () => {
+                pCurrentX = pLerp(pCurrentX, (mouseX / window.innerWidth - 0.5) * 2, 0.05);
+                pCurrentY = pLerp(pCurrentY, (mouseY / window.innerHeight - 0.5) * 2, 0.05);
+                const activeElements = document.querySelectorAll('.tab-content.active .js-parallax');
+                activeElements.forEach(el => {
+                    const depth = parseFloat(el.getAttribute('data-depth')) || 0.1;
+                    el.style.transform = `translate3d(${pCurrentX * depth * 150}px, ${pCurrentY * depth * 150}px, 0)`;
+                });
+                requestAnimationFrame(renderParallax);
+            };
+            if (window.matchMedia("(hover: hover)").matches) renderParallax();
+
+            // --- 5. PARTICLES ENGINE ---
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                cursorCanvas.width = window.innerWidth;
+                cursorCanvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const particleColors = ['#FFFFFF', '#FFB6C1', '#FF69B4'];
+            const shapes = ['✦', '✧', '⋆'];
+
+            // Background Stars
+            class Particle {
+                constructor() { this.reset(); this.y = Math.random() * canvas.height; }
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + 20;
+                    this.size = Math.random() * 3 + 1.5;
+                    this.speedY = Math.random() * 0.4 + 0.1; 
+                    this.speedX = (Math.random() - 0.5) * 0.2;
+                    this.color = particleColors[Math.floor(Math.random() * particleColors.length)];
+                    this.shape = shapes[Math.floor(Math.random() * shapes.length)];
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                }
+                update() {
+                    this.y -= this.speedY; this.x += this.speedX;
+                    this.x -= pCurrentX * this.size * 0.5;
+                    this.y -= pCurrentY * this.size * 0.5;
+                    if (this.y < -30) this.reset();
+                }
+                draw() {
+                    ctx.save();
+                    ctx.globalAlpha = this.opacity;
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 8; ctx.shadowColor = this.color;
+                    ctx.font = `${this.size * 5}px Arial`;
+                    ctx.fillText(this.shape, this.x, this.y);
+                    ctx.restore();
+                }
+            }
+
+            // Cursor Particle (Stars being thrown)
+            class CursorStar {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = Math.random() * 2 + 2;
+                    this.vx = (Math.random() - 0.5) * 2.5;
+                    this.vy = (Math.random() - 0.5) * 2.5;
+                    this.life = 1.0;
+                    this.decay = Math.random() * 0.02 + 0.01;
+                    this.color = particleColors[Math.floor(Math.random() * particleColors.length)];
+                    this.shape = shapes[Math.floor(Math.random() * shapes.length)];
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.life -= this.decay;
+                }
+                draw() {
+                    if(this.life <= 0) return;
+                    cursorCtx.save();
+                    cursorCtx.globalAlpha = this.life;
+                    cursorCtx.fillStyle = this.color;
+                    cursorCtx.shadowBlur = 10;
+                    cursorCtx.shadowColor = this.color;
+                    cursorCtx.font = `${this.size * 6}px Arial`;
+                    cursorCtx.fillText(this.shape, this.x, this.y);
+                    cursorCtx.restore();
+                }
+            }
+
+            const particleCount = window.innerWidth < 768 ? 20 : 50;
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+                
+                // Fondo
+                particles.forEach(p => { p.update(); p.draw(); });
+                
+                // Estela del cursor
+                for (let i = 0; i < cursorParticles.length; i++) {
+                    cursorParticles[i].update();
+                    cursorParticles[i].draw();
+                    if (cursorParticles[i].life <= 0) {
+                        cursorParticles.splice(i, 1);
+                        i--;
+                    }
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            // --- 6. QUOTES SYSTEM (FADE IN/OUT) ---
+            // EDITAR TEXTO AQUI: Las frases que se alternan con efecto FADE
+            const heroQuotes = [
+                { title: "🩷Una bad bitch girl de los noventas.🩷", desc: "" },
+                { title: "😈 Mas perra que el filtro de Snapchat, solo yo supero mi racha.", desc: "" }
+            ];
+            
+            let currentQuote = 0;
+            const quoteContent = document.getElementById('quote-content');
+            const quoteTitle = document.getElementById('quote-title');
+            const quoteDesc = document.getElementById('quote-desc');
+
+            if (quoteContent) {
+                setInterval(() => {
+                    quoteContent.classList.add('hidden');
+                    setTimeout(() => {
+                        currentQuote = (currentQuote + 1) % heroQuotes.length;
+                        quoteTitle.textContent = heroQuotes[currentQuote].title;
+                        quoteDesc.textContent = heroQuotes[currentQuote].desc;
+                        quoteContent.classList.remove('hidden');
+                    }, 800); 
+                }, 5000); 
+            }
+
+            // --- 7. SPARKLE EFFECT BOTÓN CLICK ME ---
+            const btnClickMe = document.getElementById('btn-click-me');
+            if (btnClickMe) {
+                btnClickMe.addEventListener('click', function(e) {
+                    // Genera 6 destellos por cada click
+                    for(let i = 0; i < 6; i++) {
+                        const sparkle = document.createElement('img');
+                        sparkle.src = 'https://img.icons8.com/?size=48&id=N8DoP13woRV9&format=png';
+                        sparkle.className = 'sparkle-particle';
+                        
+                        // Generar trayectoria circular aleatoria
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = Math.random() * 30 + 25; // 25 a 55 px
+                        const tx = Math.cos(angle) * distance + 'px';
+                        const ty = Math.sin(angle) * distance + 'px';
+                        
+                        sparkle.style.setProperty('--tx', tx);
+                        sparkle.style.setProperty('--ty', ty);
+                        
+                        // Iniciar desde el centro del botón
+                        sparkle.style.left = '50%';
+                        sparkle.style.top = '50%';
+                        
+                        this.appendChild(sparkle);
+                        
+                        // Eliminar partícula después de la animación
+                        setTimeout(() => sparkle.remove(), 600);
+                    }
+                });
+            }
+
+        });
+
+        // --- 8. PROTECCIÓN BÁSICA FRONTEND ---
+        // Bloquear clic derecho (menú contextual)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Bloquear teclas de herramientas de desarrollador y código fuente
+        document.addEventListener('keydown', function(e) {
+            // Bloquear F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+            }
+            // Bloquear Ctrl+Shift+I (Windows/Linux) o Cmd+Option+I (Mac)
+            if ((e.ctrlKey || e.metaKey) && (e.shiftKey || e.altKey) && (e.key.toLowerCase() === 'i' || e.keyCode === 73)) {
+                e.preventDefault();
+            }
+            // Bloquear Ctrl+Shift+C (Windows/Linux) o Cmd+Option+C (Mac)
+            if ((e.ctrlKey || e.metaKey) && (e.shiftKey || e.altKey) && (e.key.toLowerCase() === 'c' || e.keyCode === 67)) {
+                e.preventDefault();
+            }
+            // Bloquear Ctrl+Shift+J (Windows/Linux) o Cmd+Option+J (Mac)
+            if ((e.ctrlKey || e.metaKey) && (e.shiftKey || e.altKey) && (e.key.toLowerCase() === 'j' || e.keyCode === 74)) {
+                e.preventDefault();
+            }
+            // Bloquear Ctrl+U (Windows/Linux) o Cmd+Option+U (Mac)
+            if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'u' || e.keyCode === 85)) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
