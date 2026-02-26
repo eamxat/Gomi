@@ -43,12 +43,14 @@
             overflow: hidden; 
             width: 100vw;
             height: 100vh;
+            height: 100dvh; /* NUEVO: Soporte responsivo dinámico exacto para iOS */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             -webkit-font-smoothing: antialiased;
             padding-top: 65px; /* NUEVO: Padding global para compensar banner externo */
+            box-sizing: border-box;
         }
 
         @media (pointer: fine) {
@@ -167,7 +169,12 @@
             padding: clamp(1.5rem, 4vh, 4rem); opacity: 0; pointer-events: none;
             transform: translateY(20px) scale(0.98); transition: var(--transition-smooth);
             display: flex; align-items: center; justify-content: center;
+            overflow-y: auto; /* NUEVO: Permite scroll interno en móviles si el contenido es muy alto */
+            overflow-x: hidden;
         }
+        
+        /* Ocultar scrollbar visualmente pero mantener funcionalidad para un look limpio */
+        .tab-content::-webkit-scrollbar { width: 0px; background: transparent; }
 
         .tab-content.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
@@ -382,6 +389,7 @@
         .photo-gallery {
             display: flex; flex-direction: row; gap: 1.5rem; width: 100%;
             flex: 1; overflow-x: auto; overflow-y: hidden; padding: 0 1rem 2rem 1rem; align-items: center; justify-content: flex-start;
+            -webkit-overflow-scrolling: touch; /* NUEVO: Scroll suave nativo en iOS */
         }
         
         /* Scrollbar personalizado y sutil para la galería (ahora horizontal) */
@@ -390,7 +398,8 @@
         .photo-gallery::-webkit-scrollbar-thumb { background: rgba(255, 105, 180, 0.5); border-radius: 10px; }
 
         .photo-card {
-            flex: 1 1 0; min-width: 220px; height: 100%; max-height: 45vh;
+            flex: 0 0 auto; /* NUEVO: Evita que las imágenes se deformen o encojan en móvil */
+            width: clamp(220px, 60vw, 300px); height: 100%; max-height: 45vh;
             background: rgba(255, 255, 255, 0.4); border: 1px solid white;
             border-radius: 24px; padding: clamp(0.5rem, 1.5vh, 1rem); box-shadow: var(--shadow-sm);
             transition: var(--transition-smooth); display: flex; justify-content: center; align-items: center;
@@ -407,10 +416,11 @@
            12. INTRO SCREEN
            ========================================= */
         #intro-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: fixed; top: 0; left: 0; width: 100vw; 
+            height: 100vh; height: 100dvh; /* NUEVO: Altura dinámica para que no se corte en Safari iOS */
             z-index: 9995; /* Por debajo del cursor pero sobre todo lo demás */
             display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-            padding-bottom: 15vh; /* Baja el botón sin romper animaciones */
+            padding-bottom: 15dvh; /* NUEVO: Respeta la barra inferior del navegador en móviles */
             background: var(--bg-color-1);
             transition: opacity 0.8s ease-in-out;
         }
@@ -445,20 +455,34 @@
            10. RESPONSIVE DESIGN
            ========================================= */
         @media (max-width: 992px) {
-            .hero-layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 1rem; text-align: center; justify-items: center;}
+            .tab-content { align-items: flex-start; /* NUEVO: Evita que se corte el contenido arriba al intentar centrarlo */ }
+            
+            .hero-layout { 
+                display: flex; flex-direction: column; height: auto; min-height: 100%;
+                gap: 1.5rem; text-align: center; justify-items: center; padding-bottom: 2rem;
+            }
             .hero-content { align-items: center; }
             .gemini-block { align-items: center; } /* Centra el botón Gemini en móvil */
             .hero-title-wrapper { align-items: center; }
             .hero-visuals { width: 100%; max-width: 600px; height: auto; min-height: 20vh;}
-            .music-content { flex-direction: column; justify-content: center; gap: 1rem; }
-            .v-music.pos-tl, .v-music.pos-br { position: relative; top: auto; left: auto; bottom: auto; right: auto; height: clamp(100px, 18vh, 150px); }
+            
+            .music-layout, .network-layout { height: auto; min-height: 100%; justify-content: flex-start; padding-bottom: 2rem; }
+            .music-content { flex-direction: column; justify-content: center; gap: 1.5rem; }
+            .v-music.pos-tl, .v-music.pos-br { position: relative; top: auto; left: auto; bottom: auto; right: auto; height: clamp(150px, 25vh, 250px); width: 100%; max-width: 350px; }
+            
             .network-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
         }
 
         @media (max-width: 600px) {
-            .navbar { width: 95%; border-radius: 20px; flex-wrap: wrap; justify-content: center; padding: 0.5rem; }
+            .navbar { width: 95%; border-radius: 20px; flex-wrap: wrap; justify-content: center; padding: 0.5rem; top: calc(0.5rem + 65px); }
             .nav-link { font-size: 0.7rem; padding: 0.4rem 0.6rem; }
-            .main-glass-panel { width: 95vw; height: clamp(500px, 85vh, 88vh); padding: 1rem; margin-top: clamp(4rem, 10vh, 5rem); }
+            .main-glass-panel { 
+                width: 95vw; 
+                height: calc(100dvh - 160px); /* NUEVO: Se ajusta dinámicamente sin salirse de la pantalla en iOS */
+                margin-top: 1rem; 
+                padding: 0.5rem; 
+            }
+            .tab-content { padding: 1rem; }
         }
     </style>
 </head>
@@ -639,7 +663,11 @@
             <div class="network-layout" style="justify-content: flex-start; padding-top: 2vh;">
                 <div class="section-header">
                     <!-- EDITAR TEXTO AQUI: Título y descripción de la sección Photos -->
-                    <h2 class="section-title">Photos</h2>
+                    <h2 class="section-title" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        Photos
+                        <!-- EDITAR IMAGEN AQUI: Reemplaza el src con la URL de tu imagen decorativa -->
+                        <img src="https://img.icons8.com/?size=48&id=N8DoP13woRV9&format=png" alt="Decor" style="height: 0.9em; width: auto; object-fit: contain; flex-shrink: 0;">
+                    </h2>
                     <p class="hero-description" style="margin: 0 auto; margin-bottom: 1rem;">Aesthetic visual gallery.</p>
                 </div>
                 
@@ -655,7 +683,7 @@
                         <img src="https://xatimg.com/image/50Xit1E66RuM.jpg" alt="Gallery Photo 3">
                     </div>
                     <div class="photo-card">
-                        <img src="https://xatimg.com/image/mDAMWWOZSD76.jpg" alt="Gallery Photo 4">
+                        <img src="https://xatimg.com/image/KSIEXDpmrKs0.jpg" alt="Gallery Photo 4">
                     </div>
                 </div>
                 
@@ -666,7 +694,10 @@
         <div class="tab-content" id="tab-saoko">
             <div class="network-layout">
                 <!-- EDITAR TEXTO AQUI: Embed de grupo XAT Saoko -->
-                <iframe src="https://xat.com/embed/chat.php#id=220531447&gn=Saoko" allow="clipboard-write" width="650" height="486" frameborder="0" scrolling="no"></iframe><br><small><a target="_BLANK" href="https://xat.com/web_gear/chat/embed.php?id=220531447&GroupName=Saoko"| <a target="_BLANK" href="https://xat.com/Saoko"/a></small><br>
+                <iframe src="https://xat.com/embed/chat.php#id=220531447&gn=Saoko" allow="clipboard-write" width="650" height="486" frameborder="0" scrolling="no"></iframe><br><small><a target="_BLANK" href="https://xat.com/web_gear/chat/embed.php?id=220531447&GroupName=Saoko"> | <a target="_BLANK" href="https://xat.com/Saoko"</small><br>
+                
+                <!-- EDITAR IMAGEN AQUI: Imagen responsiva debajo del embed -->
+                <img src="https://via.placeholder.com/650x150/FFEAEE/C44577?text=Tu+Imagen+Aqui" alt="Saoko Image" style="max-width: 100%; width: 650px; height: auto; object-fit: contain; border-radius: 16px; margin-top: 0.5rem; flex-shrink: 0;">
             </div>
         </div>
 
@@ -982,5 +1013,5 @@
         });
     </script>
 </body>
-
 </html>
+
