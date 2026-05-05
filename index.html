@@ -702,7 +702,7 @@
                             <span class="status-dot"></span>
                             <!-- EDITAR TEXTO AQUI: Estado en línea de la etiqueta superior -->
                             <span class="status-text">En línea</span>
-                            <span class="status-year">Riri (2025)</span>
+                            <span class="status-year">Gomi (2025)</span>
                         </div>
                     </div>
 
@@ -1155,28 +1155,28 @@
 
             // --- 6. QUOTES SYSTEM (FADE IN/OUT) ---
             // EDITAR TEXTO AQUI: Las frases que se alternan con efecto FADE
-            const heroQuotes = [
-                { title: "🩷Una bad bitch girl de los noventas.🩷", desc: "" },
-                { title: "😈 Mas perra que el filtro de Snapchat, solo yo supero mi racha.", desc: "" }
-                { title: "La MamiChula", desc: "" }
-            ];
-            
-            let currentQuote = 0;
-            const quoteContent = document.getElementById('quote-content');
-            const quoteTitle = document.getElementById('quote-title');
-            const quoteDesc = document.getElementById('quote-desc');
+        const heroQuotes = [
+    { title: "🩷Una bad bitch girl de los noventas.🩷", desc: "" },
+    { title: "😈 Mas perra que el filtro de Snapchat, solo yo supero mi racha.", desc: "" },
+    { title: "La MamiChula.", desc: "" } // ← añadida
+];
 
-            if (quoteContent) {
-                setInterval(() => {
-                    quoteContent.classList.add('hidden');
-                    setTimeout(() => {
-                        currentQuote = (currentQuote + 1) % heroQuotes.length;
-                        quoteTitle.textContent = heroQuotes[currentQuote].title;
-                        quoteDesc.textContent = heroQuotes[currentQuote].desc;
-                        quoteContent.classList.remove('hidden');
-                    }, 800); 
-                }, 5000); 
-            }
+let currentQuote = 0;
+const quoteContent = document.getElementById('quote-content');
+const quoteTitle = document.getElementById('quote-title');
+const quoteDesc = document.getElementById('quote-desc');
+
+if (quoteContent) {
+    setInterval(() => {
+        quoteContent.classList.add('hidden');
+        setTimeout(() => {
+            currentQuote = (currentQuote + 1) % heroQuotes.length;
+            quoteTitle.textContent = heroQuotes[currentQuote].title;
+            quoteDesc.textContent = heroQuotes[currentQuote].desc;
+            quoteContent.classList.remove('hidden');
+        }, 800); 
+    }, 5000); 
+}
 
             // --- 7. SPARKLE EFFECT BOTÓN CLICK ME ---
             const clickMeButtons = document.querySelectorAll('.btn-click-me');
